@@ -1,4 +1,12 @@
-﻿public static int Add(int x , int y )
+﻿
+public class Program
 {
-    return x + y;
+    public static void Main()
+    {
+    }
+
+    public static int Add(int x, int y)
+    {
+        return x + y;
+    }
 }
