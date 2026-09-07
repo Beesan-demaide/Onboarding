@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestPlatform.TestHost;
-
-namespace Onboarding.Tests;
+﻿namespace Onboarding.Tests;
 
 public class UnitTest1
 {
