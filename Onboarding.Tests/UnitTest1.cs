@@ -3,8 +3,14 @@
 public class UnitTest1
 {
     [Fact]
-    public void Test1()
+    public void Test1_Add()
     {
         Assert.Equal(4, Program.Add(2,2));
+    }
+    [Fact]
+    public void Test2_Subtract()
+    {
+        Assert.Equal(5, Program.Subtract(10, 5));
+
     }
 }
