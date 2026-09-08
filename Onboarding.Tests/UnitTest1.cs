@@ -16,4 +16,9 @@ public class UnitTest1
         Assert.Equal(5, Program.Subtract(10, 5));
 
     }
+    [Fact]
+    public void Test2_Subtract()
+    {
+        Assert.Equal(5, Program.Subtract(10, 5));
+    }
 }
