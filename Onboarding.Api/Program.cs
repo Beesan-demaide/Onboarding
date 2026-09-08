@@ -1,4 +1,5 @@
 var Tasks = new List<TaskItem>();
+static int _nextId = 1;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,10 +51,11 @@ app.MapGet("/tasks/{id}",(int id) =>
 app.MapPost("/tasks", (CreateTaskRequest request) =>
     {
         var task = new TaskItem(
-            Tasks.Count + 1,
+           _nextId,
             request.Title,
             false
             );
+        _nextId++;
         Tasks.Add(task);
         return Results.Created($"/tasks/{task.Id}", task);
     });
