@@ -1,12 +1,15 @@
-var Tasks = new List<TaskItem>();
-static int _nextId = 1;
+using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddDbContext<TaskDbContext>(options =>
+    options.UseSqlite("Data Source=tasks.db"));
 
+    
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -22,25 +25,15 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
 app.MapGet("/add", (int x,int y ) => x + y);
 
-app.MapGet("/tasks",() => Tasks);
-app.MapGet("/tasks/{id}",(int id) =>
+app.MapGet("/tasks", async (TaskDbContext db) =>
     {
-        var task = Tasks.FirstOrDefault(t => t.Id == id);
+        return await db.Tasks.ToListAsync();
+    });
+app.MapGet("/tasks/{id}",async(int id,TaskDbContext db) =>
+    {
+        var task = await db.Tasks.FirstOrDefaultAsync(t => t.Id == id);
 
         if (task is null)
             return Results.NotFound();
@@ -48,17 +41,20 @@ app.MapGet("/tasks/{id}",(int id) =>
         return Results.Ok(task);
     });
 
-app.MapPost("/tasks", (CreateTaskRequest request) =>
+app.MapPost("/tasks", async (CreateTaskRequest request ,TaskDbContext db) =>
     {
-        var task = new TaskItem(
-           _nextId,
-            request.Title,
-            false
-            );
-        _nextId++;
-        Tasks.Add(task);
+        var task = new TaskItem
+        {
+            Title = request.Title,
+           IsDone = false
+        };
+        db.Tasks.Add(task);
+
+        await db.SaveChangesAsync();
+
         return Results.Created($"/tasks/{task.Id}", task);
     });
+
 
 app.Run();
 
