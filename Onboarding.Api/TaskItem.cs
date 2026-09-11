@@ -1,7 +1,10 @@
-public record TaskItem(
-    int Id,
-    string Title,
-    bool IsDone
-    );
+public class TaskItem
+{
+    public int Id { get; set; }
+    public string Title { get; set; }=string.Empty;
+    public bool IsDone { get; set; }
 
-      
+    public TaskItem()
+    {
+    }
+}
