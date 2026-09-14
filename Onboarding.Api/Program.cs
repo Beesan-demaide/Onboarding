@@ -20,11 +20,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
 app.MapGet("/add", (int x,int y ) => x + y);
 
 app.MapGet("/tasks", async (TaskDbContext db) =>
@@ -43,6 +38,9 @@ app.MapGet("/tasks/{id}",async(int id,TaskDbContext db) =>
 
 app.MapPost("/tasks", async (CreateTaskRequest request ,TaskDbContext db) =>
     {
+        if (string.IsNullOrWhiteSpace(request.Title))
+            return Results.BadRequest();
+
         var task = new TaskItem
         {
             Title = request.Title,
@@ -55,7 +53,38 @@ app.MapPost("/tasks", async (CreateTaskRequest request ,TaskDbContext db) =>
         return Results.Created($"/tasks/{task.Id}", task);
     });
 
+app.MapPut("/tasks/{id}",async (int id, UpdatedTaskRequest request,TaskDbContext db) =>
+    {
+        var task =await db.Tasks.FirstOrDefaultAsync(t => t.Id == id);
 
+        if(task is null)
+            return Results.NotFound();
+
+    if (request.Title != null && string.IsNullOrWhiteSpace(request.Title))
+            return Results.BadRequest();
+
+        if(request.Title != null)
+        task.Title = request.Title;
+
+        if(request.IsDone.HasValue)
+        task.IsDone = request.IsDone.Value;
+        
+        await db.SaveChangesAsync();
+
+        return Results.Ok(task);
+    });
+app.MapDelete("/tasks/{id}",async (int id ,TaskDbContext db) =>
+    {
+        var task = await db.Tasks.FirstOrDefaultAsync(task => task.Id == id);
+
+        if (task is null)
+            return Results.NotFound();
+
+        db.Tasks.Remove(task);
+        await db.SaveChangesAsync();
+
+        return Results.NoContent();
+    });
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
@@ -63,3 +92,4 @@ record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }
 public record CreateTaskRequest(string Title);
+public record UpdatedTaskRequest(string? Title,bool? IsDone);
