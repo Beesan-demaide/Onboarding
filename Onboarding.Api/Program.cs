@@ -20,7 +20,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/add", (int x,int y ) => x + y);
 
 app.MapGet("/tasks", async (TaskDbContext db) =>
     {
@@ -87,9 +86,5 @@ app.MapDelete("/tasks/{id}",async (int id ,TaskDbContext db) =>
     });
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
 public record CreateTaskRequest(string Title);
 public record UpdatedTaskRequest(string? Title,bool? IsDone);
